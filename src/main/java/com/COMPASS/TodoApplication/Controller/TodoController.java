@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import com.COMPASS.TodoApplication.Repository.TodoRepository;
 
+import org.springframework.ui.Model;
 import lombok.RequiredArgsConstructor;
 
 @Controller 
@@ -16,7 +17,8 @@ public class TodoController {
     private final TodoRepository todoRepository;
 
     @GetMapping({"","/","/home"})
-    public String showHomePage(){
+    public String showHomePage(Model model){
+        model.addAttribute("todos", todoRepository.findAll());
         return "index";
     }
     
