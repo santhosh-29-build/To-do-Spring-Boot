@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.COMPASS.TodoApplication.Entity.TodoEntity;
 import com.COMPASS.TodoApplication.Repository.TodoRepository;
@@ -25,10 +26,33 @@ public class TodoController {
     }
 
     @PostMapping("/add")
-    public String addTodo(@RequestParam String title) {
+    public String addTodo(@RequestParam String title,
+            RedirectAttributes redirectAttributes) {
 
-        TodoEntity newTodo = TodoEntity.builder().title(title).isCompleted(false).build();
+        title = title.trim();
+
+        if (title.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error",
+                    "Todo title cannot be empty!");
+            return "redirect:/";
+        }
+
+        if (todoRepository.existsByTitleIgnoreCase(title)) {
+            redirectAttributes.addFlashAttribute("error",
+                    "Todo already exists!");
+            return "redirect:/";
+        }
+
+        TodoEntity newTodo = TodoEntity.builder()
+                .title(title)
+                .isCompleted(false)
+                .build();
+
         todoRepository.save(newTodo);
+
+        redirectAttributes.addFlashAttribute("success",
+                "Todo added successfully!");
+
         return "redirect:/";
     }
 
@@ -44,8 +68,9 @@ public class TodoController {
     }
 
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable long id){
-        TodoEntity existingtodo = todoRepository.findById(id).orElseThrow(() -> new RuntimeException("To do Not found"+id));
+    public String delete(@PathVariable long id) {
+        TodoEntity existingtodo = todoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("To do Not found" + id));
         todoRepository.delete(existingtodo);
         return "redirect:/";
     }
