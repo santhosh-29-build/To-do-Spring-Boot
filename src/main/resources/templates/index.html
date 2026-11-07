@@ -1,110 +1,87 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <meta
-        name="description"
-        content="A simple, calming task manager to organize your day."
-    >
-
-    <title>Todo Management — Organize Your Day</title>
+    <title>Task Manager</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
-    <link
-        href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap"
-        rel="stylesheet"
-    >
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/CSS/style.css">
-    <script src="/JS/script.js" defer></script>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-
 <body>
-    <main class="todo-container">
-        <!-- Header -->
-        <header class="header">
-            <h1>Todo Management</h1>
-            <p>
-                Clear your mind. Organize your day.
-                Make room for what matters.
-            </p>
+
+<main class="app">
+    <section class="app-card" aria-labelledby="app-title">
+
+        <header class="app-header">
+            <div>
+                <h1 id="app-title">Task Manager</h1>
+                <p class="app-subtitle">Organize your day, one task at a time.</p>
+            </div>
+
+            <div class="task-counter" th:if="${todos != null}">
+                <span class="counter-number" th:text="${#lists.size(todos)}">0</span>
+                <span class="counter-label">tasks</span>
+            </div>
         </header>
 
-        <!-- Add task -->
-        <div class="todo-form-container">
-            <form class="todo-form" id="todoForm">
+        <form class="task-form" th:action="@{/add}" method="post" id="task-form">
+            <div class="input-group">
+                <label class="sr-only" for="task">New task</label>
                 <input
-                    type="text"
-                    id="todoInput"
-                    name="task"
-                    class="todo-input"
-                    placeholder="What needs to get done?"
-                    aria-label="New task"
-                    autocomplete="off"
-                    required
+                        type="text"
+                        id="task"
+                        name="title"
+                        class="task-input"
+                        placeholder="What needs to be done?"
+                        autocomplete="off"
+                        required
                 >
-
-                <button type="submit" class="add-btn">
-                    <span aria-hidden="true">+</span>
-                    Add Todo
+                <button type="submit" class="add-button">
+                    <span class="button-icon" aria-hidden="true">+</span>
+                    Add task
                 </button>
-            </form>
-        </div>
-
-        <!-- Task filters -->
-        <div
-            class="filter-container"
-            role="group"
-            aria-label="Filter tasks"
-        >
-            <button
-                type="button"
-                class="filter-btn active"
-                data-filter="all"
-            >
-                All
-                <span id="allCount">0</span>
-            </button>
-
-            <button
-                type="button"
-                class="filter-btn"
-                data-filter="active"
-            >
-                Active
-                <span id="activeCount">0</span>
-            </button>
-
-            <button
-                type="button"
-                class="filter-btn"
-                data-filter="completed"
-            >
-                Completed
-                <span id="completedCount">0</span>
-            </button>
-        </div>
-
-        <!-- Task list -->
-        <section
-            class="todo-list-container"
-            aria-label="Your tasks"
-        >
-            <div class="todo-list" id="todoList">
-                <div class="empty-state" id="emptyState">
-                    <div class="empty-icon" aria-hidden="true">☷</div>
-                    <p>No todos found</p>
-                    <span>Add your first todo to get started!</span>
-                </div>
             </div>
+        </form>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(todos)}">
+            <div class="empty-icon" aria-hidden="true">🗒️</div>
+            <h2>No tasks yet</h2>
+            <p>Add your first task above to get started.</p>
+        </div>
+
+        <section class="task-list" th:if="${!#lists.isEmpty(todos)}" aria-label="Task list">
+            <article
+                    class="task-item"
+                    th:each="todo : ${todos}"
+                    th:classappend="${todo.completed} ? 'is-completed'"
+            >
+                <a
+                        class="status-button"
+                        th:href="@{/update/{id}(id=${todo.id})}"
+                        th:aria-label="${todo.completed} ? 'Mark task as not completed' : 'Mark task as completed'"
+                >
+                    <span class="status-icon" th:text="${todo.completed} ? '✓' : ''"></span>
+                </a>
+
+                <span class="task-title" th:text="${todo.title}">Task title</span>
+
+                <a
+                        class="delete-button"
+                        th:href="@{/delete/{id}(id=${todo.id})}"
+                        th:aria-label="'Delete task: ' + ${todo.title}"
+                >
+                    <span aria-hidden="true">🗑️</span>
+                </a>
+            </article>
         </section>
-    </main>
+
+    </section>
+</main>
+
+<script th:src="@{/JS/script.js}" defer></script>
 </body>
 </html>
